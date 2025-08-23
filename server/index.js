@@ -28,11 +28,22 @@ app.use(cors({
         'http://localhost:3000',
         'https://video.bakebit.com',
         'http://video.bakebit.com',
-        'http://bakebit.com'
-        // 'https://your-vercel-app.vercel.app',
-        // 'https://your-custom-domain.com'
+        'https://backend-video.bakebit.com',
+        'http://backend-video.bakebit.com'
     ],
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+        'Origin',
+        'Access-Control-Request-Method',
+        'Access-Control-Request-Headers'
+    ],
+    exposedHeaders: ['Content-Range', 'Accept-Ranges'],
+    maxAge: 86400 // 24 hours
 }));
 
 // JSON এবং URL-encoded ডেটা পার্স করার জন্য মিডলওয়্যার
