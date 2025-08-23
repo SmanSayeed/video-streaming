@@ -78,14 +78,14 @@ const Login = ({ onLogin }) => {
           </LoginButton>
         </LoginForm>
 
-        <LoginInfo>
+        {/* <LoginInfo>
           <InfoText>ডেমো অ্যাকাউন্ট:</InfoText>
           <InfoText>ইউজারনেম: <strong>admin</strong></InfoText>
           <InfoText>পাসওয়ার্ড: <strong>password</strong></InfoText>
           <BackButton onClick={() => navigate('/')}>
             🏠 মূল পেজে ফিরে যান
           </BackButton>
-        </LoginInfo>
+        </LoginInfo> */}
       </LoginCard>
     </LoginContainer>
   );

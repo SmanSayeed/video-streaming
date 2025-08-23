@@ -24,7 +24,11 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 // মিডলওয়্যার সেটআপ
 // Middleware setup
 app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    origin: [
+        'http://localhost:3000',
+        // 'https://your-vercel-app.vercel.app',
+        // 'https://your-custom-domain.com'
+    ],
     credentials: true
 }));
 

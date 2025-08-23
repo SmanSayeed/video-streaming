@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { fetchVideos } from '../store/slices/videoSlice';
+import { fetchVideos, resetVideoStore } from '../store/slices/videoSlice';
 import { useNotification } from './Notification';
 import InlineVideoPlayer from './InlineVideoPlayer';
 
@@ -14,13 +14,30 @@ const VideoCards = () => {
   const navigate = useNavigate();
   const { videos, loading, error } = useSelector(state => state.video);
 
+  // Debug logging
+  useEffect(() => {
+    console.log('🔍 VideoCards State:', { videos, loading, error });
+  }, [videos, loading, error]);
+
   const [likes, setLikes] = useState({});
   const [comments, setComments] = useState({});
   const [playingVideoId, setPlayingVideoId] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { showSuccess } = useNotification();
 
   useEffect(() => {
-    dispatch(fetchVideos());
+    console.log('🔄 VideoCards: Fetching videos...');
+    dispatch(fetchVideos())
+      .then((result) => {
+        if (result.meta.requestStatus === 'fulfilled') {
+          console.log('✅ VideoCards: Videos fetched successfully:', result.payload);
+        } else {
+          console.error('❌ VideoCards: Videos fetch failed:', result.error);
+        }
+      })
+      .catch((error) => {
+        console.error('❌ VideoCards: Videos fetch error:', error);
+      });
   }, [dispatch]);
 
   useEffect(() => {
@@ -43,6 +60,35 @@ const VideoCards = () => {
       setPlayingVideoId(null);
     } else {
       setPlayingVideoId(video.id);
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setIsRefreshing(true);
+      console.log('🔄 Starting refresh...');
+
+      // Reset local state
+      setPlayingVideoId(null);
+      setLikes({});
+      setComments({});
+
+      // Reset Redux store first
+      dispatch(resetVideoStore());
+
+      // Clear Redux store and refetch videos
+      const result = await dispatch(fetchVideos());
+      console.log('🔄 Refresh result:', result);
+
+      if (result.meta.requestStatus === 'fulfilled') {
+        showSuccess('🔄 রিফ্রেশ সম্পন্ন হয়েছে!', 'ভিডিওগুলি আবার লোড করা হয়েছে');
+      } else {
+        console.error('❌ Refresh failed:', result.error);
+      }
+    } catch (error) {
+      console.error('Refresh error:', error);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -115,9 +161,12 @@ const VideoCards = () => {
       <VideoCardsHeader>
         <HeaderTitle>🎬 ভিডিও শর্টস</HeaderTitle>
         <HeaderSubtitle>টিকটক স্টাইলে ভিডিও দেখুন</HeaderSubtitle>
-        <AdminButton onClick={() => navigate('/admin')}>
-          🔐 অ্যাডমিন প্যানেল
-        </AdminButton>
+        <HeaderActions>
+          <RefreshButton onClick={handleRefresh} disabled={isRefreshing}>
+            {isRefreshing ? '⏳ রিফ্রেশ হচ্ছে...' : '🔄 রিফ্রেশ'}
+          </RefreshButton>
+    
+        </HeaderActions>
       </VideoCardsHeader>
 
       <VideoCardsGrid>
@@ -207,6 +256,38 @@ const HeaderSubtitle = styled.p`
   opacity: 0.9;
 `;
 
+const HeaderActions = styled.div`
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+`;
+
+const RefreshButton = styled.button`
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
 const AdminButton = styled.button`
   background: rgba(255, 255, 255, 0.2);
   color: white;
@@ -216,7 +297,6 @@ const AdminButton = styled.button`
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 20px;
   transition: all 0.3s ease;
 
   &:hover {

@@ -247,6 +247,21 @@ const videoSlice = createSlice({
             state.videos = action.payload;
         },
 
+        // রিডাক্স স্টোর রিসেট করার জন্য
+        // For resetting Redux store
+        resetVideoStore: (state) => {
+            state.videos = [];
+            state.selectedVideo = null;
+            state.isLoading = false;
+            state.loadingError = null;
+            state.isUploading = false;
+            state.uploadError = null;
+            state.uploadProgress = 0;
+            state.processingJobs = [];
+            state.selectedJob = null;
+            state.jobStatus = 'idle';
+        },
+
         // প্রসেসিং জব আপডেট করার জন্য
         // For updating processing job
         updateProcessingJob: (state, action) => {
@@ -389,6 +404,7 @@ export const {
     setSelectedJob,
     updateVideoList,
     updateProcessingJob,
+    resetVideoStore,
 } = videoSlice.actions;
 
 // Selectors এক্সপোর্ট করছি
