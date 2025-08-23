@@ -1,0 +1,95 @@
+/* গ্লোবাল CSS স্টাইল */
+/* Global CSS styles */
+
+/* সব এলিমেন্টের জন্য বেসিক রিসেট */
+/* Basic reset for all elements */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* HTML এবং body এর জন্য বেসিক স্টাইল */
+/* Basic styles for HTML and body */
+html,
+body {
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* রুট এলিমেন্টের জন্য স্টাইল */
+/* Styles for root element */
+#root {
+    height: 100%;
+}
+
+/* বাটন এর জন্য বেসিক স্টাইল */
+/* Basic styles for buttons */
+button {
+    cursor: pointer;
+    border: none;
+    outline: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* ইনপুট ফিল্ড এর জন্য বেসিক স্টাইল */
+/* Basic styles for input fields */
+input,
+textarea {
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* লিংক এর জন্য বেসিক স্টাইল */
+/* Basic styles for links */
+a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #764ba2;
+}
+
+/* স্ক্রলবার স্টাইল */
+/* Scrollbar styles */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #764ba2;
+}

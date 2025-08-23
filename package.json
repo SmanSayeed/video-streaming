@@ -1,0 +1,28 @@
+{
+  "name": "video-streaming-app",
+  "version": "1.0.0",
+  "description": "A simple video streaming application with video upload and playback features",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "start": "cd server && npm start",
+    "test-server": "node test-server.js",
+    "test-ffmpeg": "node test-ffmpeg.js"
+  },
+  "keywords": [
+    "video",
+    "streaming",
+    "ffmpeg",
+    "react",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
