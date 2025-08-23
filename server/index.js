@@ -26,6 +26,9 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 app.use(cors({
     origin: [
         'http://localhost:3000',
+        'https://video.bakebit.com',
+        'http://video.bakebit.com',
+        'http://bakebit.com'
         // 'https://your-vercel-app.vercel.app',
         // 'https://your-custom-domain.com'
     ],
