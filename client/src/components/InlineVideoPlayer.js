@@ -4,195 +4,197 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
+import envConfig from '../config/envConfig';
 
 const InlineVideoPlayer = ({ videoId, onClose }) => {
-    const videoRef = useRef(null);
-    const { videos } = useSelector(state => state.video);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
-    const [volume, setVolume] = useState(0.5);
-    const [isMuted, setIsMuted] = useState(true);
-    const [showControls, setShowControls] = useState(false);
-    const [buffering, setBuffering] = useState(false);
+  const videoRef = useRef(null);
+  const { videos } = useSelector(state => state.video);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(envConfig.PLAYER.DEFAULT_VOLUME);
+  const [isMuted, setIsMuted] = useState(true);
+  const [showControls, setShowControls] = useState(false);
+  const [buffering, setBuffering] = useState(false);
 
-    const video = videos?.find(v => v.id === videoId);
+  const video = videos?.find(v => v.id === videoId);
 
-    useEffect(() => {
-        if (video && videoRef.current) {
-            // Auto-play when video is selected
-            const playPromise = videoRef.current.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    setIsPlaying(true);
-                }).catch(error => {
-                    console.log('Auto-play prevented:', error);
-                    setIsPlaying(false);
-                });
-            }
-        }
-    }, [video]);
+  useEffect(() => {
+    if (video && videoRef.current) {
+      // Auto-play when video is selected
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          setIsPlaying(true);
+        }).catch(error => {
+          console.log('Auto-play prevented:', error);
+          setIsPlaying(false);
+        });
+      }
+    }
+  }, [video]);
 
-    useEffect(() => {
-        if (!isPlaying) return;
+  useEffect(() => {
+    if (!isPlaying) return;
 
-        const timer = setTimeout(() => {
-            setShowControls(false);
-        }, 3000);
+    const timer = setTimeout(() => {
+      setShowControls(false);
+    }, envConfig.PLAYER.CONTROLS_TIMEOUT);
 
-        return () => clearTimeout(timer);
-    }, [isPlaying, showControls]);
+    return () => clearTimeout(timer);
+  }, [isPlaying, showControls]);
 
-    const togglePlay = async () => {
-        if (videoRef.current) {
-            try {
-                if (isPlaying) {
-                    videoRef.current.pause();
-                    setIsPlaying(false);
-                } else {
-                    const playPromise = videoRef.current.play();
-                    if (playPromise !== undefined) {
-                        await playPromise;
-                        setIsPlaying(true);
-                    }
-                }
-            } catch (error) {
-                console.error('Play/Pause error:', error);
-                setIsPlaying(false);
-            }
-        }
-    };
-
-    const handleTimeUpdate = () => {
-        if (videoRef.current) {
-            setCurrentTime(videoRef.current.currentTime);
-        }
-    };
-
-    const handleLoadedMetadata = () => {
-        if (videoRef.current) {
-            setDuration(videoRef.current.duration);
-        }
-    };
-
-    const handleSeek = (e) => {
-        if (videoRef.current) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const width = rect.width;
-            const seekTime = (clickX / width) * duration;
-            videoRef.current.currentTime = seekTime;
-        }
-    };
-
-    const handleVolumeChange = (e) => {
-        const newVolume = parseFloat(e.target.value);
-        setVolume(newVolume);
-        if (videoRef.current) {
-            videoRef.current.volume = newVolume;
-        }
-        if (newVolume === 0) {
-            setIsMuted(true);
+  const togglePlay = async () => {
+    if (videoRef.current) {
+      try {
+        if (isPlaying) {
+          videoRef.current.pause();
+          setIsPlaying(false);
         } else {
-            setIsMuted(false);
+          const playPromise = videoRef.current.play();
+          if (playPromise !== undefined) {
+            await playPromise;
+            setIsPlaying(true);
+          }
         }
-    };
+      } catch (error) {
+        console.error('Play/Pause error:', error);
+        setIsPlaying(false);
+      }
+    }
+  };
 
-    const toggleMute = () => {
-        if (videoRef.current) {
-            videoRef.current.muted = !isMuted;
-            setIsMuted(!isMuted);
-        }
-    };
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  };
 
-    const formatTime = (time) => {
-        const minutes = Math.floor(time / 60);
-        const seconds = Math.floor(time % 60);
-        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    };
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+    }
+  };
 
-    if (!video) return null;
+  const handleSeek = (e) => {
+    if (videoRef.current) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const width = rect.width;
+      const seekTime = (clickX / width) * duration;
+      videoRef.current.currentTime = seekTime;
+    }
+  };
 
-    return (
-        <PlayerContainer>
-            <VideoContainer
-                onMouseEnter={() => setShowControls(true)}
-                onMouseLeave={() => setShowControls(false)}
-            >
-                <StyledVideo
-                    ref={videoRef}
-                    onTimeUpdate={handleTimeUpdate}
-                    onLoadedMetadata={handleLoadedMetadata}
-                    onWaiting={() => setBuffering(true)}
-                    onCanPlay={() => setBuffering(false)}
-                    onLoadStart={() => setBuffering(true)}
-                    onLoadedData={() => setBuffering(false)}
-                    onError={(e) => {
-                        console.error('Video error:', e);
-                        setBuffering(false);
-                        setIsPlaying(false);
-                    }}
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                    onEnded={() => setIsPlaying(false)}
-                    onClick={togglePlay}
-                    muted={isMuted}
-                    loop
-                >
-                    <source src={`/api/stream/${video.id}`} type="video/mp4" />
-                    আপনার ব্রাউজার ভিডিও সাপোর্ট করে না।
-                </StyledVideo>
+  const handleVolumeChange = (e) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
+    if (videoRef.current) {
+      videoRef.current.volume = newVolume;
+    }
+    if (newVolume === 0) {
+      setIsMuted(true);
+    } else {
+      setIsMuted(false);
+    }
+  };
 
-                {buffering && (
-                    <BufferingOverlay>
-                        <BufferingSpinner>⏳</BufferingSpinner>
-                    </BufferingOverlay>
-                )}
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
 
-                                 <ControlsOverlay $show={showControls}>
-                   <ProgressBar onClick={handleSeek}>
-                     <ProgressFill
-                       style={{ width: `${(currentTime / duration) * 100}%` }}
-                     />
-                   </ProgressBar>
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
 
-                   <ControlsContainer>
-                     <LeftControls>
-                       <PlayButton onClick={togglePlay}>
-                         {isPlaying ? '⏸️' : '▶️'}
-                       </PlayButton>
+  if (!video) return null;
 
-                       <TimeDisplay>
-                         {formatTime(currentTime)} / {formatTime(duration)}
-                       </TimeDisplay>
-                     </LeftControls>
+  return (
+    <PlayerContainer>
+      <VideoContainer
+        onMouseEnter={() => setShowControls(true)}
+        onMouseLeave={() => setShowControls(false)}
+      >
+        <StyledVideo
+          ref={videoRef}
+          crossOrigin="anonymous"
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+          onWaiting={() => setBuffering(true)}
+          onCanPlay={() => setBuffering(false)}
+          onLoadStart={() => setBuffering(true)}
+          onLoadedData={() => setBuffering(false)}
+          onError={(e) => {
+            console.error('Video error:', e);
+            setBuffering(false);
+            setIsPlaying(false);
+          }}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => setIsPlaying(false)}
+          onClick={togglePlay}
+          muted={isMuted}
+          loop
+        >
+          <source src={envConfig.VIDEO_STREAM_URL(video.id)} type="video/mp4" />
+          আপনার ব্রাউজার ভিডিও সাপোর্ট করে না।
+        </StyledVideo>
 
-                     <RightControls>
-                       <VolumeControl>
-                         <VolumeButton onClick={toggleMute}>
-                           {isMuted || volume === 0 ? '🔇' : '🔊'}
-                         </VolumeButton>
-                         <VolumeSlider
-                           type="range"
-                           min="0"
-                           max="1"
-                           step="0.1"
-                           value={isMuted ? 0 : volume}
-                           onChange={handleVolumeChange}
-                         />
-                       </VolumeControl>
-                       
-                       <FullscreenButton onClick={() => videoRef.current?.requestFullscreen()}>
-                         ⛶
-                       </FullscreenButton>
-                     </RightControls>
-                   </ControlsContainer>
-                 </ControlsOverlay>
+        {buffering && (
+          <BufferingOverlay>
+            <BufferingSpinner>⏳</BufferingSpinner>
+          </BufferingOverlay>
+        )}
 
-                                 <CloseButton onClick={onClose}>✕</CloseButton>
-               </VideoContainer>
-        </PlayerContainer>
-    );
+        <ControlsOverlay $show={showControls}>
+          <ProgressBar onClick={handleSeek}>
+            <ProgressFill
+              style={{ width: `${(currentTime / duration) * 100}%` }}
+            />
+          </ProgressBar>
+
+          <ControlsContainer>
+            <LeftControls>
+              <PlayButton onClick={togglePlay}>
+                {isPlaying ? '⏸️' : '▶️'}
+              </PlayButton>
+
+              <TimeDisplay>
+                {formatTime(currentTime)} / {formatTime(duration)}
+              </TimeDisplay>
+            </LeftControls>
+
+            <RightControls>
+              <VolumeControl>
+                <VolumeButton onClick={toggleMute}>
+                  {isMuted || volume === 0 ? '🔇' : '🔊'}
+                </VolumeButton>
+                <VolumeSlider
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={isMuted ? 0 : volume}
+                  onChange={handleVolumeChange}
+                />
+              </VolumeControl>
+
+              <FullscreenButton onClick={() => videoRef.current?.requestFullscreen()}>
+                ⛶
+              </FullscreenButton>
+            </RightControls>
+          </ControlsContainer>
+        </ControlsOverlay>
+
+        <CloseButton onClick={onClose}>✕</CloseButton>
+      </VideoContainer>
+    </PlayerContainer>
+  );
 };
 
 
